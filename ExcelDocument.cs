@@ -65,6 +65,12 @@ namespace XMLtoXLSXcvt
                 ExcelWorksheet.Cells[CurrentRowCount, i + 1] = values[i];
             CurrentRowCount++;
         }
+        public void AddRow(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+                ExcelWorksheet.Cells[CurrentRowCount, i + 1] = values[i];
+            CurrentRowCount++;
+        }
         public int RowCount
         {
             get

@@ -10,21 +10,19 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-
+using System.Xml;
 
 namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.0.0.3";
+        private readonly static string Version = "0.1.0.0";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)
         {
-            ColumnsTextBox.Text = "";
-            FilterTextBox.Text = "";
             ImageTextBox.Text = "";
+            TemplateTextBox.Text = "";
             using (var file = File.OpenText(path))
             {
                 while (!file.EndOfStream)
@@ -32,22 +30,20 @@ namespace XMLtoXLSXcvt
                     var line = file.ReadLine();
                     var split_point = line.IndexOf(':');
                     var key = line.Substring(0, split_point).Trim();
-                    var value = line.Substring(split_point + 1).Trim();
+                    var value = line.Substring(split_point + 1);
 
                     switch (key)
                     {
                         case "XMLPath": XMLTextBox.Text = value; break;
                         case "XLSXPath": XLSXTextBox.Text = value; break;
-                        case "NodesPath": PathTextBox.Text = value; break;
-                        case "Column": ColumnsTextBox.AppendText(value + Environment.NewLine); break;
-                        case "Filter": FilterTextBox.AppendText(value + Environment.NewLine); break;
                         case "Image": ImageTextBox.AppendText(value + Environment.NewLine); break;
-                        case "AtLeastOnve": AtLeastOneCheckBox.Checked = bool.Parse(value); break;
                         case "CRR": Properties.CRRValue = float.Parse(value); break;
                         case "ICWR": Properties.ICWRValue = float.Parse(value); break;
+                        case "Template": TemplateTextBox.AppendText(value + Environment.NewLine); break;
                     }
                 }
             }
+            TemplateTextBox.Text = TemplateTextBox.Text.TrimEnd();
         }
         private void SaveConfig(string path)
         {
@@ -55,16 +51,12 @@ namespace XMLtoXLSXcvt
             {
                 file.WriteLine("XMLPath:" + XMLTextBox.Text);
                 file.WriteLine("XLSXPath:" + XLSXTextBox.Text);
-                file.WriteLine("NodesPath:" + PathTextBox.Text);
-                foreach (var line in ColumnsTextBox.Lines)
-                    if (line.Length > 0) file.WriteLine("Column:" + line);
-                foreach (var line in FilterTextBox.Lines)
-                    if (line.Length > 0) file.WriteLine("Filter:" + line);
                 foreach (var line in ImageTextBox.Lines)
                     if (line.Length > 0) file.WriteLine("Image:" + line);
-                file.WriteLine("AtLeastOnve:" + AtLeastOneCheckBox.Checked);
                 file.WriteLine("CRR:" + Properties.CRRValue);
                 file.WriteLine("ICWR:" + Properties.ICWRValue);
+                foreach (var line in TemplateTextBox.Lines)
+                    file.WriteLine("Template:" + line);
             }
         }
 
@@ -108,32 +100,13 @@ namespace XMLtoXLSXcvt
                 }
                 var xlsx_path = XLSXTextBox.Text;
                 try { xlsx_path = Path.GetFullPath(xlsx_path); }
-                catch { ErrorMessenger.ShowBadFileNameError(this, xlsx_path); return; }  
-                
-                var values_to_export = ParseConfig(ColumnsTextBox.Lines);
-                if (values_to_export.ContainsKey(""))
-                {
-                    ErrorMessenger.ShowBadConfigError(this, "Columns", values_to_export[""]);
-                    return;
-                }
+                catch { ErrorMessenger.ShowBadFileNameError(this, xlsx_path); return; }
 
-                var values_filter = ParseConfig(FilterTextBox.Lines);
-                if (values_filter.ContainsKey(""))
-                {
-                    ErrorMessenger.ShowBadConfigError(this, "Filters", values_filter[""]);
-                    return;
-                }
+                TemplateNode template;
+                try { template = new TemplateNode(TemplateTextBox.Lines); }
+                catch (Exception ex) { ErrorMessenger.ShowBadTemplateError(this, ex.Message); return; }
 
-                var nodes_to_parse = PathTextBox.Text;
-
-                var converter = new Converter(
-                    xml_path,
-                    xlsx_path,
-                    values_to_export,
-                    values_filter,
-                    nodes_to_parse,
-                    AtLeastOneCheckBox.Checked
-                    );
+                var converter = new Converter(xml_path, xlsx_path, template);
 
                 ConvertButton.Enabled = false;
 
@@ -335,6 +308,10 @@ namespace XMLtoXLSXcvt
         {
             var sub_form = new PropertiesForm(Properties);
             sub_form.ShowDialog(this);
+        }
+        
+        private void TestDebugOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
         }
     }
 }

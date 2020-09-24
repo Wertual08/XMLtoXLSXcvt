@@ -39,6 +39,11 @@ namespace XMLtoXLSXcvt
             MessageBox.Show(window, "Недопустимое имя файла [" + path + "].",
                 "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
+        public static void ShowBadTemplateError(IWin32Window window, string line)
+        {
+            MessageBox.Show(window, "Недопустимая стока [" + line + "].",
+                "Ошибка шаблона.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
 }

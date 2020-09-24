@@ -30,12 +30,7 @@
         {
             this.OpenDialog = new System.Windows.Forms.OpenFileDialog();
             this.SaveDialog = new System.Windows.Forms.SaveFileDialog();
-            this.ColumnsTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.PathTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.FilterTextBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.XMLTextBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -56,10 +51,11 @@
             this.label6 = new System.Windows.Forms.Label();
             this.ResolverBackgroundWorker = new System.ComponentModel.BackgroundWorker();
             this.ProgressLabel = new System.Windows.Forms.Label();
-            this.AtLeastOneCheckBox = new System.Windows.Forms.CheckBox();
             this.BrowseXMLButton = new System.Windows.Forms.Button();
             this.BrowseXLSXButton = new System.Windows.Forms.Button();
             this.StopImagesButton = new System.Windows.Forms.Button();
+            this.TestDebugOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TemplateTextBox = new System.Windows.Forms.TextBox();
             this.TopMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -68,64 +64,14 @@
             this.OpenDialog.DefaultExt = "xml";
             this.OpenDialog.Title = "Select XML file";
             // 
-            // ColumnsTextBox
-            // 
-            this.ColumnsTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.ColumnsTextBox.Location = new System.Drawing.Point(12, 129);
-            this.ColumnsTextBox.Multiline = true;
-            this.ColumnsTextBox.Name = "ColumnsTextBox";
-            this.ColumnsTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ColumnsTextBox.Size = new System.Drawing.Size(288, 278);
-            this.ColumnsTextBox.TabIndex = 1;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(9, 113);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(202, 13);
+            this.label1.Size = new System.Drawing.Size(85, 13);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Названия столбцов: Пути до значений";
-            // 
-            // PathTextBox
-            // 
-            this.PathTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.PathTextBox.Location = new System.Drawing.Point(306, 129);
-            this.PathTextBox.Name = "PathTextBox";
-            this.PathTextBox.Size = new System.Drawing.Size(535, 20);
-            this.PathTextBox.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(303, 113);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(91, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "Путь до объекта";
-            // 
-            // FilterTextBox
-            // 
-            this.FilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.FilterTextBox.Location = new System.Drawing.Point(306, 168);
-            this.FilterTextBox.Multiline = true;
-            this.FilterTextBox.Name = "FilterTextBox";
-            this.FilterTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.FilterTextBox.Size = new System.Drawing.Size(535, 131);
-            this.FilterTextBox.TabIndex = 5;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(303, 152);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(174, 13);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "Фильтр по значениям в объекте";
+            this.label1.Text = "Шаблон поиска";
             // 
             // label4
             // 
@@ -258,7 +204,8 @@
             // видToolStripMenuItem
             // 
             this.видToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.PropertiesToolStripMenuItem});
+            this.PropertiesToolStripMenuItem,
+            this.TestDebugOnlyToolStripMenuItem});
             this.видToolStripMenuItem.Name = "видToolStripMenuItem";
             this.видToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.видToolStripMenuItem.Text = "Вид";
@@ -267,26 +214,25 @@
             // 
             this.PropertiesToolStripMenuItem.Name = "PropertiesToolStripMenuItem";
             this.PropertiesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.PropertiesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.PropertiesToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
             this.PropertiesToolStripMenuItem.Text = "Настройки";
             this.PropertiesToolStripMenuItem.Click += new System.EventHandler(this.PropertiesToolStripMenuItem_Click);
             // 
             // ImageTextBox
             // 
-            this.ImageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.ImageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ImageTextBox.Location = new System.Drawing.Point(306, 318);
+            this.ImageTextBox.Location = new System.Drawing.Point(590, 129);
             this.ImageTextBox.Multiline = true;
             this.ImageTextBox.Name = "ImageTextBox";
             this.ImageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ImageTextBox.Size = new System.Drawing.Size(535, 89);
+            this.ImageTextBox.Size = new System.Drawing.Size(251, 278);
             this.ImageTextBox.TabIndex = 17;
             // 
             // label6
             // 
-            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(303, 302);
+            this.label6.Location = new System.Drawing.Point(587, 113);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(254, 13);
             this.label6.TabIndex = 18;
@@ -309,17 +255,6 @@
             this.ProgressLabel.Name = "ProgressLabel";
             this.ProgressLabel.Size = new System.Drawing.Size(0, 13);
             this.ProgressLabel.TabIndex = 19;
-            // 
-            // AtLeastOneCheckBox
-            // 
-            this.AtLeastOneCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.AtLeastOneCheckBox.AutoSize = true;
-            this.AtLeastOneCheckBox.Location = new System.Drawing.Point(684, 151);
-            this.AtLeastOneCheckBox.Name = "AtLeastOneCheckBox";
-            this.AtLeastOneCheckBox.Size = new System.Drawing.Size(157, 17);
-            this.AtLeastOneCheckBox.TabIndex = 20;
-            this.AtLeastOneCheckBox.Text = "Только один из фильтров";
-            this.AtLeastOneCheckBox.UseVisualStyleBackColor = true;
             // 
             // BrowseXMLButton
             // 
@@ -355,15 +290,35 @@
             this.StopImagesButton.UseVisualStyleBackColor = true;
             this.StopImagesButton.Click += new System.EventHandler(this.StopImagesButton_Click);
             // 
+            // TestDebugOnlyToolStripMenuItem
+            // 
+            this.TestDebugOnlyToolStripMenuItem.Name = "TestDebugOnlyToolStripMenuItem";
+            this.TestDebugOnlyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.TestDebugOnlyToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.TestDebugOnlyToolStripMenuItem.Text = "Test (Debug only)";
+            this.TestDebugOnlyToolStripMenuItem.Click += new System.EventHandler(this.TestDebugOnlyToolStripMenuItem_Click);
+            // 
+            // TemplateTextBox
+            // 
+            this.TemplateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TemplateTextBox.Location = new System.Drawing.Point(12, 129);
+            this.TemplateTextBox.Multiline = true;
+            this.TemplateTextBox.Name = "TemplateTextBox";
+            this.TemplateTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.TemplateTextBox.Size = new System.Drawing.Size(572, 278);
+            this.TemplateTextBox.TabIndex = 28;
+            // 
             // ConverterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(853, 448);
+            this.Controls.Add(this.TemplateTextBox);
             this.Controls.Add(this.StopImagesButton);
             this.Controls.Add(this.BrowseXLSXButton);
             this.Controls.Add(this.BrowseXMLButton);
-            this.Controls.Add(this.AtLeastOneCheckBox);
             this.Controls.Add(this.ProgressLabel);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.ImageTextBox);
@@ -374,12 +329,7 @@
             this.Controls.Add(this.XLSXTextBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.XMLTextBox);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.FilterTextBox);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.PathTextBox);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.ColumnsTextBox);
             this.Controls.Add(this.TopMenuStrip);
             this.MainMenuStrip = this.TopMenuStrip;
             this.Name = "ConverterForm";
@@ -396,12 +346,7 @@
         #endregion
         private System.Windows.Forms.OpenFileDialog OpenDialog;
         private System.Windows.Forms.SaveFileDialog SaveDialog;
-        private System.Windows.Forms.TextBox ColumnsTextBox;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox PathTextBox;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox FilterTextBox;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox XMLTextBox;
         private System.Windows.Forms.Label label5;
@@ -420,12 +365,13 @@
         private System.Windows.Forms.Label label6;
         private System.ComponentModel.BackgroundWorker ResolverBackgroundWorker;
         private System.Windows.Forms.Label ProgressLabel;
-        private System.Windows.Forms.CheckBox AtLeastOneCheckBox;
         private System.Windows.Forms.ToolStripMenuItem видToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem PropertiesToolStripMenuItem;
         private System.Windows.Forms.Button BrowseXMLButton;
         private System.Windows.Forms.Button BrowseXLSXButton;
         private System.Windows.Forms.Button StopImagesButton;
+        private System.Windows.Forms.ToolStripMenuItem TestDebugOnlyToolStripMenuItem;
+        private System.Windows.Forms.TextBox TemplateTextBox;
     }
 }
 
