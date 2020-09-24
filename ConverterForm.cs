@@ -16,7 +16,7 @@ namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.1.0.0";
+        private readonly static string Version = "0.1.0.2";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)

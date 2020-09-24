@@ -35,11 +35,25 @@ namespace XMLtoXLSXcvt
             document.Load(XMLPath);
             using (var result_document = new ExcelDocument())
             {
-                result_document.AddRow(Template.GetValueNames());
+                result_document.AddRow();
+                List<string> columns = new List<string>();
 
-                Template.Apply(document, (List<string> values, int i, int count) => 
+                Template.Apply(document, (Dictionary<string, string> values, int i, int count) => 
                 {
-                    result_document.AddRow(values);
+                    List<string> row = new List<string>(values.Count);
+                    foreach (var value in values)
+                    {
+                        int index = columns.IndexOf(value.Key);
+                        if (index < 0)
+                        {
+                            index = columns.Count;
+                            columns.Add(value.Key);
+                        }
+                        while (row.Count <= index) row.Add("");
+                        row[index] = value.Value;
+                    }
+                    result_document.AddRow(row);
+
                     int progress = (i + 1) * 100 / count;
                     if (Progress != progress)
                     {
@@ -47,6 +61,9 @@ namespace XMLtoXLSXcvt
                         ProgressChanged?.Invoke(this, EventArgs.Empty);
                     }
                 });
+
+                for (int i = 0; i < columns.Count; i++)
+                    result_document[i, 0] = columns[i];
 
                 return result_document.Save(XLSXPath);
             }

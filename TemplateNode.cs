@@ -24,7 +24,7 @@ namespace XMLtoXLSXcvt
             for (int i = 0; i < lines.Length; i++)
             {
                 var line = lines[i].Trim();
-                if (line.Length <= 0) continue;
+                if (line.Length <= 0 || line[0] == '#') continue;
 
 
                 if (line.StartsWith("(") && line.EndsWith(")"))
@@ -78,25 +78,6 @@ namespace XMLtoXLSXcvt
             }
         }
 
-        public void Apply(XmlNode root, Action<List<string>, int, int> action)
-        {
-            var nodes = root.SelectNodes(Path);
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-
-                if (CheckFilters(node))
-                {
-                    var values = new List<string>();
-                    FindValues(node, values);
-
-                    foreach (var sub_node in SubNodes)
-                        sub_node.Apply(node, values, values.Count);
-
-                    action?.Invoke(values, i, nodes.Count);
-                }
-            }
-        }
         public List<string> GetValueNames()
         {
             var list = new List<string>();
@@ -108,8 +89,7 @@ namespace XMLtoXLSXcvt
 
             return list;
         }
-
-        private void Apply(XmlNode root, List<string> values, int start)
+        public void Apply(XmlNode root, Action<Dictionary<string, string>, int, int> action)
         {
             var nodes = root.SelectNodes(Path);
             for (int i = 0; i < nodes.Count; i++)
@@ -118,30 +98,74 @@ namespace XMLtoXLSXcvt
 
                 if (CheckFilters(node))
                 {
-                    FindValues(node, values, start);
+                    var values = new Dictionary<string, string>();
+                    FindValues(node, values);
 
                     foreach (var sub_node in SubNodes)
-                        sub_node.Apply(root, values, start + Values.Count);
+                        sub_node.Apply(node, values);
+
+                    action?.Invoke(values, i, nodes.Count);
                 }
             }
         }
-        private void FindValues(XmlNode node, List<string> values, int start = -1)
+
+        private void Apply(XmlNode root, Dictionary<string, string> values)
         {
-            int pos = 0;
+            var nodes = root.SelectNodes(Path);
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                if (CheckFilters(node))
+                {
+                    FindValues(node, values);
+
+                    foreach (var sub_node in SubNodes)
+                        sub_node.Apply(node, values);
+                }
+            }
+        }
+        private void FindValues(XmlNode node, Dictionary<string, string> values)
+        {
             foreach (var value in Values)
             {
-                string result = "";
-                if (start >= 0 && start + pos < values.Count) result = values[start + pos];
+                var name = value.Key;
+                var path = value.Value;
 
-                foreach (XmlNode sub_node in node.SelectNodes(value.Value))
+                if (name.StartsWith("$"))
                 {
-                    var text = sub_node.FirstChild as XmlText;
-                    if (text != null) result += (result.Length > 0 ? "; " : "") + WebUtility.HtmlDecode(text.Data);
-                }
+                    name = name.Substring(1);
 
-                if (start < 0 || start + pos >= values.Count) values.Add(result);
-                else values[start + pos] = result;
-                pos++;
+                    foreach (XmlNode sub_node_name in node.SelectNodes(name))
+                    {
+                        var text_name = sub_node_name.FirstChild as XmlText;
+                        if (text_name != null)
+                        {
+                            foreach (XmlNode sub_node in node.SelectNodes(path))
+                            {
+                                var text = sub_node.FirstChild as XmlText;
+                                if (text != null)
+                                {
+                                    if (!values.ContainsKey(text_name.Data)) 
+                                        values.Add(text_name.Data, WebUtility.HtmlDecode(text.Data));
+                                    else values[text_name.Data] += "; " + WebUtility.HtmlDecode(text.Data);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (XmlNode sub_node in node.SelectNodes(path))
+                    {
+                        var text = sub_node.FirstChild as XmlText;
+                        if (text != null)
+                        {
+                            if (!values.ContainsKey(name)) values.Add(name, WebUtility.HtmlDecode(text.Data));
+                            else values[name] += "; " + WebUtility.HtmlDecode(text.Data);
+                        }
+                    }
+                }
             }
         }
         private bool CheckFilters(XmlNode node)

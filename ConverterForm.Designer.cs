@@ -47,6 +47,7 @@
             this.SaveConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.видToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TestDebugOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ImageTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.ResolverBackgroundWorker = new System.ComponentModel.BackgroundWorker();
@@ -54,7 +55,6 @@
             this.BrowseXMLButton = new System.Windows.Forms.Button();
             this.BrowseXLSXButton = new System.Windows.Forms.Button();
             this.StopImagesButton = new System.Windows.Forms.Button();
-            this.TestDebugOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TemplateTextBox = new System.Windows.Forms.TextBox();
             this.TopMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -218,6 +218,14 @@
             this.PropertiesToolStripMenuItem.Text = "Настройки";
             this.PropertiesToolStripMenuItem.Click += new System.EventHandler(this.PropertiesToolStripMenuItem_Click);
             // 
+            // TestDebugOnlyToolStripMenuItem
+            // 
+            this.TestDebugOnlyToolStripMenuItem.Name = "TestDebugOnlyToolStripMenuItem";
+            this.TestDebugOnlyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.TestDebugOnlyToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
+            this.TestDebugOnlyToolStripMenuItem.Text = "Test (Debug only)";
+            this.TestDebugOnlyToolStripMenuItem.Click += new System.EventHandler(this.TestDebugOnlyToolStripMenuItem_Click);
+            // 
             // ImageTextBox
             // 
             this.ImageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -290,19 +298,12 @@
             this.StopImagesButton.UseVisualStyleBackColor = true;
             this.StopImagesButton.Click += new System.EventHandler(this.StopImagesButton_Click);
             // 
-            // TestDebugOnlyToolStripMenuItem
-            // 
-            this.TestDebugOnlyToolStripMenuItem.Name = "TestDebugOnlyToolStripMenuItem";
-            this.TestDebugOnlyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
-            this.TestDebugOnlyToolStripMenuItem.Size = new System.Drawing.Size(206, 22);
-            this.TestDebugOnlyToolStripMenuItem.Text = "Test (Debug only)";
-            this.TestDebugOnlyToolStripMenuItem.Click += new System.EventHandler(this.TestDebugOnlyToolStripMenuItem_Click);
-            // 
             // TemplateTextBox
             // 
             this.TemplateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.TemplateTextBox.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TemplateTextBox.Location = new System.Drawing.Point(12, 129);
             this.TemplateTextBox.Multiline = true;
             this.TemplateTextBox.Name = "TemplateTextBox";

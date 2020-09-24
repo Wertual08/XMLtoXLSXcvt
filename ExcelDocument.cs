@@ -15,7 +15,7 @@ namespace XMLtoXLSXcvt
         private Excel.Application ExcelApplication;
         private Excel.Workbook ExcelWorkbook;
         private Excel.Worksheet ExcelWorksheet;
-        private int CurrentRowCount = 1;
+        private int CurrentRowCount = 0;
 
         public float ColumnRow { get; set; } = 6.0f;
         public float ImageColumnWidth { get; set; } = 5.8f;
@@ -34,7 +34,7 @@ namespace XMLtoXLSXcvt
             if (ExcelApplication == null) throw new Exception("Excel API error: Excel is not installed.");
             ExcelWorkbook = ExcelApplication.Workbooks.Open(path);
             if (ExcelWorkbook.ReadOnly) throw new FileLoadException("Document [" + path + "] is read only.");
-            ExcelWorksheet = ExcelWorkbook.Worksheets[1];
+            ExcelWorksheet = ExcelWorkbook.Worksheets[1]; 
         }
         ~ExcelDocument()
         {
@@ -59,46 +59,49 @@ namespace XMLtoXLSXcvt
             IsDisposed = true;
         }
 
+        public void AddRow()
+        {
+            CurrentRowCount++;
+        }
         public void AddRow(string[] values)
         {
             for (int i = 0; i < values.Length; i++)
-                ExcelWorksheet.Cells[CurrentRowCount, i + 1] = values[i];
+                this[i, CurrentRowCount] = values[i];
             CurrentRowCount++;
         }
         public void AddRow(List<string> values)
         {
             for (int i = 0; i < values.Count; i++)
-                ExcelWorksheet.Cells[CurrentRowCount, i + 1] = values[i];
+                this[i, CurrentRowCount] = values[i];
             CurrentRowCount++;
         }
         public int RowCount
         {
-            get
-            {
-                return ExcelWorksheet.Cells.Find("*", System.Reflection.Missing.Value,
+            get => ExcelWorksheet.Cells.Find("*", System.Reflection.Missing.Value,
                                System.Reflection.Missing.Value, System.Reflection.Missing.Value,
                                Excel.XlSearchOrder.xlByRows, Excel.XlSearchDirection.xlPrevious,
                                false, System.Reflection.Missing.Value, System.Reflection.Missing.Value).Row;
-            }
         }
         public int ColumnCount
         {
-            get
-            {
-                return ExcelWorksheet.Cells.Find("*", System.Reflection.Missing.Value,
+            get => ExcelWorksheet.Cells.Find("*", System.Reflection.Missing.Value,
                                System.Reflection.Missing.Value, System.Reflection.Missing.Value,
                                Excel.XlSearchOrder.xlByColumns, Excel.XlSearchDirection.xlPrevious,
                                false, System.Reflection.Missing.Value, System.Reflection.Missing.Value).Column;
-            }
         }
         public string this[int x, int y]
         {
             get => ExcelWorksheet.Cells[y + 1, x + 1].Value?.ToString() ?? "";
-            set => ExcelWorksheet.Cells[y + 1, x + 1] = value;
+            set
+            {
+                Excel.Range range = ExcelWorksheet.Cells[y + 1, x + 1];
+                range.NumberFormat = "@";
+                ExcelWorksheet.Cells[y + 1, x + 1] = value;
+            }
         }
         public void AddImage(int x, int y, string path)
         {
-            Excel.Range oRange = (Excel.Range)ExcelWorksheet.Cells[y + 1, x + 1];
+            Excel.Range oRange = ExcelWorksheet.Cells[y + 1, x + 1];
             float Left = (float)oRange.Left;
             float Top = (float)oRange.Top;
             var shape = ExcelWorksheet.Shapes.AddPicture(
@@ -106,7 +109,6 @@ namespace XMLtoXLSXcvt
                 Microsoft.Office.Core.MsoTriState.msoFalse,
                 Microsoft.Office.Core.MsoTriState.msoCTrue,
                 Left, Top, -1, -1);
-
             oRange.ColumnWidth = Math.Max(shape.Width / ImageColumnWidth, (float)oRange.ColumnWidth);
             oRange.RowHeight = Math.Max(shape.Height * ColumnRow / ImageColumnWidth, (float)oRange.RowHeight);
         }
