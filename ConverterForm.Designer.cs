@@ -48,6 +48,8 @@
             this.видToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.TestDebugOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AbortToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ImageTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.ResolverBackgroundWorker = new System.ComponentModel.BackgroundWorker();
@@ -55,7 +57,7 @@
             this.BrowseXMLButton = new System.Windows.Forms.Button();
             this.BrowseXLSXButton = new System.Windows.Forms.Button();
             this.StopImagesButton = new System.Windows.Forms.Button();
-            this.TemplateTextBox = new System.Windows.Forms.TextBox();
+            this.TemplateTextBox = new System.Windows.Forms.RichTextBox();
             this.TopMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -143,6 +145,7 @@
             // ConverterBackgroundWorker
             // 
             this.ConverterBackgroundWorker.WorkerReportsProgress = true;
+            this.ConverterBackgroundWorker.WorkerSupportsCancellation = true;
             this.ConverterBackgroundWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.ConverterBackgroundWorker_DoWork);
             this.ConverterBackgroundWorker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.ConverterBackgroundWorker_ProgressChanged);
             this.ConverterBackgroundWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.ConverterBackgroundWorker_RunWorkerCompleted);
@@ -151,7 +154,8 @@
             // 
             this.TopMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.FileToolStripMenuItem,
-            this.видToolStripMenuItem});
+            this.видToolStripMenuItem,
+            this.ToolsToolStripMenuItem});
             this.TopMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.TopMenuStrip.Name = "TopMenuStrip";
             this.TopMenuStrip.Size = new System.Drawing.Size(853, 24);
@@ -226,6 +230,21 @@
             this.TestDebugOnlyToolStripMenuItem.Text = "Test (Debug only)";
             this.TestDebugOnlyToolStripMenuItem.Click += new System.EventHandler(this.TestDebugOnlyToolStripMenuItem_Click);
             // 
+            // ToolsToolStripMenuItem
+            // 
+            this.ToolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.AbortToolStripMenuItem});
+            this.ToolsToolStripMenuItem.Name = "ToolsToolStripMenuItem";
+            this.ToolsToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.ToolsToolStripMenuItem.Text = "Инструменты";
+            // 
+            // AbortToolStripMenuItem
+            // 
+            this.AbortToolStripMenuItem.Name = "AbortToolStripMenuItem";
+            this.AbortToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.AbortToolStripMenuItem.Text = "Прервать";
+            this.AbortToolStripMenuItem.Click += new System.EventHandler(this.AbortToolStripMenuItem_Click);
+            // 
             // ImageTextBox
             // 
             this.ImageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -239,6 +258,7 @@
             // 
             // label6
             // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(587, 113);
             this.label6.Name = "label6";
@@ -303,13 +323,13 @@
             this.TemplateTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.TemplateTextBox.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.TemplateTextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TemplateTextBox.Location = new System.Drawing.Point(12, 129);
-            this.TemplateTextBox.Multiline = true;
             this.TemplateTextBox.Name = "TemplateTextBox";
-            this.TemplateTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TemplateTextBox.Size = new System.Drawing.Size(572, 278);
-            this.TemplateTextBox.TabIndex = 28;
+            this.TemplateTextBox.TabIndex = 29;
+            this.TemplateTextBox.Text = "";
+            this.TemplateTextBox.TextChanged += new System.EventHandler(this.TemplateTextBox_TextChanged);
             // 
             // ConverterForm
             // 
@@ -372,7 +392,9 @@
         private System.Windows.Forms.Button BrowseXLSXButton;
         private System.Windows.Forms.Button StopImagesButton;
         private System.Windows.Forms.ToolStripMenuItem TestDebugOnlyToolStripMenuItem;
-        private System.Windows.Forms.TextBox TemplateTextBox;
+        private System.Windows.Forms.ToolStripMenuItem ToolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem AbortToolStripMenuItem;
+        private System.Windows.Forms.RichTextBox TemplateTextBox;
     }
 }
 

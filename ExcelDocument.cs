@@ -59,6 +59,15 @@ namespace XMLtoXLSXcvt
             IsDisposed = true;
         }
 
+        public void AddColumn(int index)
+        {
+            Excel.Range range = ExcelWorksheet.Range[ExcelWorksheet.Cells[1, index + 1], ExcelWorksheet.Cells[CurrentRowCount, index + 1]];
+            var data = new string[CurrentRowCount];
+            for (int i = 0; i < CurrentRowCount; i++)
+                data[i] = "";
+            range.Value = data;
+        }
+
         public void AddRow()
         {
             CurrentRowCount++;
@@ -71,9 +80,13 @@ namespace XMLtoXLSXcvt
         }
         public void AddRow(List<string> values)
         {
-            for (int i = 0; i < values.Count; i++)
-                this[i, CurrentRowCount] = values[i];
             CurrentRowCount++;
+            Excel.Range range = ExcelWorksheet.Range[
+                ExcelWorksheet.Cells[CurrentRowCount, 1],
+                ExcelWorksheet.Cells[CurrentRowCount, values.Count]
+                ];
+            range.NumberFormat = "@";
+            range.Value = values.ToArray();
         }
         public int RowCount
         {
@@ -109,8 +122,8 @@ namespace XMLtoXLSXcvt
                 Microsoft.Office.Core.MsoTriState.msoFalse,
                 Microsoft.Office.Core.MsoTriState.msoCTrue,
                 Left, Top, -1, -1);
-            oRange.ColumnWidth = Math.Max(shape.Width / ImageColumnWidth, (float)oRange.ColumnWidth);
-            oRange.RowHeight = Math.Max(shape.Height * ColumnRow / ImageColumnWidth, (float)oRange.RowHeight);
+            oRange.ColumnWidth = Math.Min(Math.Max(shape.Width / ImageColumnWidth, (float)oRange.ColumnWidth), 200);
+            oRange.RowHeight = Math.Min(Math.Max(shape.Height * ColumnRow / ImageColumnWidth, (float)oRange.RowHeight), 400);
         }
 
         public bool Save(string path)

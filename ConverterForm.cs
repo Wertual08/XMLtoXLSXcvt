@@ -16,7 +16,7 @@ namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.1.0.2";
+        private readonly static string Version = "0.1.2.4";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)
@@ -99,6 +99,7 @@ namespace XMLtoXLSXcvt
                     return;
                 }
                 var xlsx_path = XLSXTextBox.Text;
+                if (!xlsx_path.ToLower().EndsWith(".xlsx")) xlsx_path += ".xlsx";
                 try { xlsx_path = Path.GetFullPath(xlsx_path); }
                 catch { ErrorMessenger.ShowBadFileNameError(this, xlsx_path); return; }
 
@@ -262,7 +263,9 @@ namespace XMLtoXLSXcvt
         {
             try
             {
+                OpenDialog.Filter = "(*.ini)|*.ini";
                 if (OpenDialog.ShowDialog(this) != DialogResult.OK) return;
+                OpenDialog.Filter = "";
 
                 LoadConfig(OpenDialog.FileName);
             }
@@ -280,8 +283,10 @@ namespace XMLtoXLSXcvt
             try
             {
                 if (SaveDialog.ShowDialog(this) != DialogResult.OK) return;
+                var filename = SaveDialog.FileName;
+                if (!filename.ToLower().EndsWith(".ini")) filename += ".ini";
 
-                SaveConfig(SaveDialog.FileName);
+                SaveConfig(filename);
             }
             catch (Exception ex)
             {
@@ -312,6 +317,39 @@ namespace XMLtoXLSXcvt
         
         private void TestDebugOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
+        }
+
+        private void AbortToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ConverterBackgroundWorker.CancelAsync();
+        }
+
+        private void TemplateTextBox_TextChanged(object sender, EventArgs e)
+        {
+            //int os = TemplateTextBox.SelectionStart;
+            //int ol = TemplateTextBox.SelectionLength;
+            //
+            //for (int i = 0; i < TemplateTextBox.Lines.Length; i++)
+            //{
+            //    var line = TemplateTextBox.Lines[i].Trim();
+            //    int start = TemplateTextBox.GetFirstCharIndexFromLine(i);
+            //
+            //    if (line.StartsWith("#"))
+            //    {
+            //        TemplateTextBox.SelectionStart = start;
+            //        TemplateTextBox.SelectionLength = line.Length;
+            //        TemplateTextBox.SelectionColor = Color.Green;
+            //    }
+            //    else
+            //    {
+            //        TemplateTextBox.SelectionStart = start;
+            //        TemplateTextBox.SelectionLength = line.Length;
+            //        TemplateTextBox.SelectionColor = Color.Black;
+            //    }
+            //}
+            //
+            //TemplateTextBox.SelectionStart = os;
+            //TemplateTextBox.SelectionLength = ol;
         }
     }
 }
