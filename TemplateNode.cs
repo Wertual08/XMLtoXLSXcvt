@@ -108,7 +108,7 @@ namespace XMLtoXLSXcvt
         }
 
         public string Path;
-        public readonly Dictionary<Unit, Unit> Filters = new Dictionary<Unit, Unit>();
+        public readonly List<KeyValuePair<Unit, Unit>> Filters = new List<KeyValuePair<Unit, Unit>>();
         public readonly Dictionary<Unit, Unit> Values = new Dictionary<Unit, Unit>();
         public readonly List<TemplateNode> SubNodes = new List<TemplateNode>();
         public TemplateNode Parrent = null;
@@ -156,10 +156,10 @@ namespace XMLtoXLSXcvt
                     if (attribs.Length != 2) throw new Exception("[Attributes count]" + i + ": " + line);
                     if (attribs[0] != "") throw new Exception("[Attributes]" + i + ": " + line);
                     if (attribs[1].Contains('$')) throw new Exception("[Attributes]" + i + ": " + line);
-                    if (current.Filters.ContainsKey(new Unit(values[0]))) 
-                        throw new Exception("[Duplicated key]" + i + ": " + line);
+                    //if (current.Filters.ContainsKey(new Unit(values[0]))) 
+                    //    throw new Exception("[Duplicated key]" + i + ": " + line);
 
-                    current.Filters.Add(new Unit(values[0]), new Unit(attribs[1], values[1]));
+                    current.Filters.Add(new KeyValuePair<Unit, Unit>(new Unit(values[0]), new Unit(attribs[1], values[1])));
                 }
                 else if (line.Contains(':'))
                 {
@@ -228,7 +228,11 @@ namespace XMLtoXLSXcvt
                     foreach (XmlNode sub_node in node.SelectNodes(path))
                     {
                         var text = sub_node.FirstChild as XmlText;
-                        if (text != null) result = Regex.IsMatch(WebUtility.HtmlDecode(text.Data), value);
+                        if (text != null)
+                        {
+                            var str = WebUtility.HtmlDecode(text.Data);
+                            result = Regex.IsMatch(str, value);
+                        }
                     }
                 }
                 else if (value_attribs.Contains('*'))
@@ -241,7 +245,11 @@ namespace XMLtoXLSXcvt
                     foreach (XmlNode sub_node in node.SelectNodes(path))
                     {
                         var text = sub_node.FirstChild as XmlText;
-                        if (text != null) result = regex.IsMatch(WebUtility.HtmlDecode(text.Data));
+                        if (text != null)
+                        {
+                            var str = WebUtility.HtmlDecode(text.Data);
+                            result = regex.IsMatch(str);
+                        }
                     }
                 }
                 else
@@ -249,7 +257,11 @@ namespace XMLtoXLSXcvt
                     foreach (XmlNode sub_node in node.SelectNodes(path))
                     {
                         var text = sub_node.FirstChild as XmlText;
-                        if (text != null) result = WebUtility.HtmlDecode(text.Data) == value;
+                        if (text != null)
+                        {
+                            var str = WebUtility.HtmlDecode(text.Data);
+                            result = str == value;
+                        }
                     }
                 }
 
@@ -282,12 +294,12 @@ namespace XMLtoXLSXcvt
                         var text_name = sub_node_name.FirstChild as XmlText;
                         if (text_name != null)
                         {
+                            var header = WebUtility.HtmlDecode(text_name.Data);
                             foreach (XmlNode sub_node in node.SelectNodes(path))
                             {
                                 var text = sub_node.FirstChild as XmlText;
                                 if (text != null)
                                 {
-                                    var header = WebUtility.HtmlDecode(text_name.Data);
                                     var data = WebUtility.HtmlDecode(text.Data);
                                     if (!result.ContainsKey(header))
                                         result.Add(header, data);

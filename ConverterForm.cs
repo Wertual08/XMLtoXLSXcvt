@@ -16,7 +16,7 @@ namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.1.2.4";
+        private readonly static string Version = "0.1.2.8";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)
@@ -43,7 +43,11 @@ namespace XMLtoXLSXcvt
                     }
                 }
             }
+
             TemplateTextBox.Text = TemplateTextBox.Text.TrimEnd();
+            TemplateTextBox.SelectAll();
+            TemplateTextBox_TextChanged(TemplateTextBox, EventArgs.Empty);
+            TemplateTextBox.Select(0, 0);
         }
         private void SaveConfig(string path)
         {
@@ -326,30 +330,38 @@ namespace XMLtoXLSXcvt
 
         private void TemplateTextBox_TextChanged(object sender, EventArgs e)
         {
-            //int os = TemplateTextBox.SelectionStart;
-            //int ol = TemplateTextBox.SelectionLength;
-            //
-            //for (int i = 0; i < TemplateTextBox.Lines.Length; i++)
-            //{
-            //    var line = TemplateTextBox.Lines[i].Trim();
-            //    int start = TemplateTextBox.GetFirstCharIndexFromLine(i);
-            //
-            //    if (line.StartsWith("#"))
-            //    {
-            //        TemplateTextBox.SelectionStart = start;
-            //        TemplateTextBox.SelectionLength = line.Length;
-            //        TemplateTextBox.SelectionColor = Color.Green;
-            //    }
-            //    else
-            //    {
-            //        TemplateTextBox.SelectionStart = start;
-            //        TemplateTextBox.SelectionLength = line.Length;
-            //        TemplateTextBox.SelectionColor = Color.Black;
-            //    }
-            //}
-            //
-            //TemplateTextBox.SelectionStart = os;
-            //TemplateTextBox.SelectionLength = ol;
+            try
+            {
+                int os = TemplateTextBox.SelectionStart;
+                int ol = TemplateTextBox.SelectionLength;
+
+                for (int index = TemplateTextBox.GetLineFromCharIndex(os); index <=
+                    TemplateTextBox.GetLineFromCharIndex(os + ol); index++)
+                {
+                    if (index < 0 || index >= TemplateTextBox.Lines[index].Length) continue;
+                    var line = TemplateTextBox.Lines[index].Trim();
+                    int start = TemplateTextBox.GetFirstCharIndexFromLine(index);
+                    int length = TemplateTextBox.Lines[index].Length;
+
+
+                    if (line.StartsWith("#"))
+                    {
+                        TemplateTextBox.SelectionStart = start;
+                        TemplateTextBox.SelectionLength = length;
+                        TemplateTextBox.SelectionColor = Color.Green;
+                    }
+                    else
+                    {
+                        TemplateTextBox.SelectionStart = start;
+                        TemplateTextBox.SelectionLength = length;
+                        TemplateTextBox.SelectionColor = Color.Black;
+                    }
+                }
+
+                TemplateTextBox.SelectionStart = os;
+                TemplateTextBox.SelectionLength = ol;
+            }
+            catch { }
         }
     }
 }
