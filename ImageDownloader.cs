@@ -27,6 +27,7 @@ namespace XMLtoXLSXcvt
             }
         }
 
+        private string Prefix = "https:";
         private string XLSXPath;
         private string[] Columns;
         private float CRR, ICWR;
@@ -73,12 +74,13 @@ namespace XMLtoXLSXcvt
                         string url = Document[x, y];
                         if (url.Length > 0)
                         {
-                            url = "https:" + url;
+                            url = Prefix + url;
+                            Downloading = url;
+                            ProgressChanged?.Invoke(this, EventArgs.Empty);
+
                             string image_path = Path.GetFullPath("image_buffer" + Path.GetExtension(url));
                             if (SaveImage(url, image_path))
                             {
-                                Downloading = url;
-                                ProgressChanged?.Invoke(this, EventArgs.Empty);
                                 Document.AddImage(x, y, image_path);
                                 Document[x, y] = "";
                             }

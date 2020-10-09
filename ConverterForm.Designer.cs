@@ -90,7 +90,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.XMLTextBox.Location = new System.Drawing.Point(12, 51);
             this.XMLTextBox.Name = "XMLTextBox";
-            this.XMLTextBox.Size = new System.Drawing.Size(730, 20);
+            this.XMLTextBox.Size = new System.Drawing.Size(700, 20);
             this.XMLTextBox.TabIndex = 7;
             // 
             // label5
@@ -108,13 +108,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.XLSXTextBox.Location = new System.Drawing.Point(12, 90);
             this.XLSXTextBox.Name = "XLSXTextBox";
-            this.XLSXTextBox.Size = new System.Drawing.Size(730, 20);
+            this.XLSXTextBox.Size = new System.Drawing.Size(700, 20);
             this.XLSXTextBox.TabIndex = 9;
             // 
             // ConvertButton
             // 
             this.ConvertButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.ConvertButton.Location = new System.Drawing.Point(12, 413);
+            this.ConvertButton.Location = new System.Drawing.Point(12, 502);
             this.ConvertButton.Name = "ConvertButton";
             this.ConvertButton.Size = new System.Drawing.Size(107, 23);
             this.ConvertButton.TabIndex = 13;
@@ -125,7 +125,7 @@
             // ResolveImagesButton
             // 
             this.ResolveImagesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.ResolveImagesButton.Location = new System.Drawing.Point(125, 413);
+            this.ResolveImagesButton.Location = new System.Drawing.Point(125, 502);
             this.ResolveImagesButton.Name = "ResolveImagesButton";
             this.ResolveImagesButton.Size = new System.Drawing.Size(140, 23);
             this.ResolveImagesButton.TabIndex = 14;
@@ -137,9 +137,9 @@
             // 
             this.ProgressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ProgressBar.Location = new System.Drawing.Point(404, 413);
+            this.ProgressBar.Location = new System.Drawing.Point(404, 502);
             this.ProgressBar.Name = "ProgressBar";
-            this.ProgressBar.Size = new System.Drawing.Size(437, 23);
+            this.ProgressBar.Size = new System.Drawing.Size(407, 23);
             this.ProgressBar.TabIndex = 15;
             // 
             // ConverterBackgroundWorker
@@ -158,7 +158,7 @@
             this.ToolsToolStripMenuItem});
             this.TopMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.TopMenuStrip.Name = "TopMenuStrip";
-            this.TopMenuStrip.Size = new System.Drawing.Size(853, 24);
+            this.TopMenuStrip.Size = new System.Drawing.Size(823, 24);
             this.TopMenuStrip.TabIndex = 16;
             this.TopMenuStrip.Text = "menuStrip1";
             // 
@@ -249,18 +249,18 @@
             // 
             this.ImageTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ImageTextBox.Location = new System.Drawing.Point(590, 129);
+            this.ImageTextBox.Location = new System.Drawing.Point(560, 129);
             this.ImageTextBox.Multiline = true;
             this.ImageTextBox.Name = "ImageTextBox";
             this.ImageTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ImageTextBox.Size = new System.Drawing.Size(251, 278);
+            this.ImageTextBox.Size = new System.Drawing.Size(251, 367);
             this.ImageTextBox.TabIndex = 17;
             // 
             // label6
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(587, 113);
+            this.label6.Location = new System.Drawing.Point(557, 113);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(254, 13);
             this.label6.TabIndex = 18;
@@ -279,7 +279,7 @@
             this.ProgressLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ProgressLabel.AutoSize = true;
             this.ProgressLabel.BackColor = System.Drawing.Color.Transparent;
-            this.ProgressLabel.Location = new System.Drawing.Point(411, 418);
+            this.ProgressLabel.Location = new System.Drawing.Point(411, 507);
             this.ProgressLabel.Name = "ProgressLabel";
             this.ProgressLabel.Size = new System.Drawing.Size(0, 13);
             this.ProgressLabel.TabIndex = 19;
@@ -287,7 +287,7 @@
             // BrowseXMLButton
             // 
             this.BrowseXMLButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BrowseXMLButton.Location = new System.Drawing.Point(748, 51);
+            this.BrowseXMLButton.Location = new System.Drawing.Point(718, 51);
             this.BrowseXMLButton.Name = "BrowseXMLButton";
             this.BrowseXMLButton.Size = new System.Drawing.Size(93, 20);
             this.BrowseXMLButton.TabIndex = 25;
@@ -298,7 +298,7 @@
             // BrowseXLSXButton
             // 
             this.BrowseXLSXButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BrowseXLSXButton.Location = new System.Drawing.Point(748, 90);
+            this.BrowseXLSXButton.Location = new System.Drawing.Point(718, 90);
             this.BrowseXLSXButton.Name = "BrowseXLSXButton";
             this.BrowseXLSXButton.Size = new System.Drawing.Size(93, 20);
             this.BrowseXLSXButton.TabIndex = 26;
@@ -310,7 +310,7 @@
             // 
             this.StopImagesButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.StopImagesButton.Enabled = false;
-            this.StopImagesButton.Location = new System.Drawing.Point(271, 413);
+            this.StopImagesButton.Location = new System.Drawing.Point(271, 502);
             this.StopImagesButton.Name = "StopImagesButton";
             this.StopImagesButton.Size = new System.Drawing.Size(127, 23);
             this.StopImagesButton.TabIndex = 27;
@@ -326,7 +326,7 @@
             this.TemplateTextBox.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.TemplateTextBox.Location = new System.Drawing.Point(12, 129);
             this.TemplateTextBox.Name = "TemplateTextBox";
-            this.TemplateTextBox.Size = new System.Drawing.Size(572, 278);
+            this.TemplateTextBox.Size = new System.Drawing.Size(542, 367);
             this.TemplateTextBox.TabIndex = 29;
             this.TemplateTextBox.Text = "";
             this.TemplateTextBox.TextChanged += new System.EventHandler(this.TemplateTextBox_TextChanged);
@@ -335,7 +335,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(853, 448);
+            this.ClientSize = new System.Drawing.Size(823, 537);
             this.Controls.Add(this.TemplateTextBox);
             this.Controls.Add(this.StopImagesButton);
             this.Controls.Add(this.BrowseXLSXButton);

@@ -16,7 +16,7 @@ namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.1.2.8";
+        private readonly static string Version = "0.1.2.A";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)
@@ -338,10 +338,11 @@ namespace XMLtoXLSXcvt
                 for (int index = TemplateTextBox.GetLineFromCharIndex(os); index <=
                     TemplateTextBox.GetLineFromCharIndex(os + ol); index++)
                 {
-                    if (index < 0 || index >= TemplateTextBox.Lines[index].Length) continue;
+                    if (index < 0 || index >= TemplateTextBox.Lines.Length) continue;
                     var line = TemplateTextBox.Lines[index].Trim();
                     int start = TemplateTextBox.GetFirstCharIndexFromLine(index);
                     int length = TemplateTextBox.Lines[index].Length;
+                    var text = TemplateTextBox.Text;
 
 
                     if (line.StartsWith("#"))
@@ -352,9 +353,41 @@ namespace XMLtoXLSXcvt
                     }
                     else
                     {
-                        TemplateTextBox.SelectionStart = start;
-                        TemplateTextBox.SelectionLength = length;
-                        TemplateTextBox.SelectionColor = Color.Black;
+                        bool in_value = false;
+                        int cur_start = start;
+                        for (int i = start; i < start + length; i++)
+                        {
+                            if (text[i] == '\"' && (i == 0 || text[i - 1] != '\\'))
+                            {
+                                if (in_value)
+                                {
+                                    TemplateTextBox.SelectionStart = cur_start;
+                                    TemplateTextBox.SelectionLength = i - cur_start + 1;
+                                    TemplateTextBox.SelectionColor = Color.Chocolate;
+                                }
+                                else
+                                {
+                                    TemplateTextBox.SelectionStart = cur_start + 1;
+                                    TemplateTextBox.SelectionLength = i - cur_start;
+                                    TemplateTextBox.SelectionColor = Color.Black;
+                                }
+                                cur_start = i;
+                                in_value = !in_value;
+                            }
+                        }
+
+                        if (in_value)
+                        {
+                            TemplateTextBox.SelectionStart = cur_start;
+                            TemplateTextBox.SelectionLength = start + length - cur_start + 1;
+                            TemplateTextBox.SelectionColor = Color.Chocolate;
+                        }
+                        else
+                        {
+                            TemplateTextBox.SelectionStart = cur_start + 1;
+                            TemplateTextBox.SelectionLength = start + length - cur_start;
+                            TemplateTextBox.SelectionColor = Color.Black;
+                        }
                     }
                 }
 

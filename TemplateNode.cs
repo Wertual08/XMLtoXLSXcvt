@@ -77,13 +77,107 @@ namespace XMLtoXLSXcvt
 
             return results.ToArray();
         }
-        private bool IsPatternPath(string pattern)
+        private static bool IsPatternPath(string pattern)
         {
             return pattern.StartsWith("(") && pattern.EndsWith(")");
         }
-        private bool IsPatternCondition(string pattern)
+        private static bool IsPatternCondition(string pattern)
         {
             return pattern.StartsWith("[") && pattern.EndsWith("]");
+        }
+        private static Predicate<string> GetPredicate(string filter_attribs, string filter_str)
+        {
+            if (filter_attribs.Contains('.')) return (string s) => Regex.IsMatch(s, filter_str);
+            else if (filter_attribs.Contains('*')) return (string s) => Regex.IsMatch(s,
+                "^" + Regex.Escape(filter_str).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            else return (string s) => s == filter_str;
+        }
+        private static bool MatchFilter(XmlNode node, string path, Predicate<string> predicate)
+        {
+            foreach (XmlNode sub_node in node.SelectNodes(path))
+            {
+                var text = sub_node.FirstChild as XmlText;
+                if (text != null) if (predicate(WebUtility.HtmlDecode(text.Data))) return true;
+            }
+            return false;
+        }
+
+        private bool CheckFilters(XmlNode node)
+        {
+            if (Filters.Count <= 0) return true;
+
+            bool any_found = false;
+            bool any_value = false;
+
+            foreach (var filter in Filters)
+            {
+                var path = filter.Key.Value;
+                var filter_attribs = filter.Value.Attributes;
+                var filter_str = filter.Value.Value;
+
+                Predicate<string> predicate = GetPredicate(filter_attribs, filter_str);
+                bool result = MatchFilter(node, path, predicate);
+
+                if (!filter_attribs.Contains('&') && !filter_attribs.Contains('|')) return result;
+                if (filter_attribs.Contains('&')) if (!result) return false;
+                if (filter_attribs.Contains('|'))
+                {
+                    any_found = true;
+                    if (result) any_value = true;
+                }
+            }
+
+            if (any_found) return any_value;
+            else return true;
+        }
+        private Dictionary<string, string> FindValues(XmlNode node)
+        {
+            var result = new Dictionary<string, string>();
+            foreach (var value in Values)
+            {
+                var name_attribs = value.Key.Attributes;
+                var name = value.Key.Value;
+                var path = value.Value.Value;
+
+                if (name_attribs.Contains('$'))
+                {
+                    foreach (XmlNode sub_node_name in node.SelectNodes(name))
+                    {
+                        var text_name = sub_node_name.FirstChild as XmlText;
+                        if (text_name != null)
+                        {
+                            var header = WebUtility.HtmlDecode(text_name.Data);
+                            foreach (XmlNode sub_node in node.SelectNodes(path))
+                            {
+                                var text = sub_node.FirstChild as XmlText;
+                                if (text != null)
+                                {
+                                    var data = WebUtility.HtmlDecode(text.Data);
+                                    if (!result.ContainsKey(header))
+                                        result.Add(header, data);
+                                    else result[header] += "; " + data;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (XmlNode sub_node in node.SelectNodes(path))
+                    {
+                        var text = sub_node.FirstChild as XmlText;
+                        if (text != null)
+                        {
+                            var data = WebUtility.HtmlDecode(text.Data);
+                            if (!result.ContainsKey(name)) result.Add(name, data);
+                            else result[name] += "; " + data;
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         public struct Unit
@@ -152,10 +246,12 @@ namespace XMLtoXLSXcvt
                 }
                 else if (IsPatternCondition(pattern))
                 {
+                    if (current == null) throw new Exception("[No current node]" + i + ": " + line);
                     if (values.Length != 2) throw new Exception("[Values count]" + i + ": " + line);
                     if (attribs.Length != 2) throw new Exception("[Attributes count]" + i + ": " + line);
                     if (attribs[0] != "") throw new Exception("[Attributes]" + i + ": " + line);
                     if (attribs[1].Contains('$')) throw new Exception("[Attributes]" + i + ": " + line);
+                    if (attribs[1].Contains('.') && attribs[1].Contains('*')) throw new Exception("[Attributes]" + i + ": " + line);
                     //if (current.Filters.ContainsKey(new Unit(values[0]))) 
                     //    throw new Exception("[Duplicated key]" + i + ": " + line);
 
@@ -163,6 +259,7 @@ namespace XMLtoXLSXcvt
                 }
                 else if (line.Contains(':'))
                 {
+                    if (current == null) throw new Exception("[No current node]" + i + ": " + line);
                     if (values.Length != 2) throw new Exception("[Values count]" + i + ": " + line);
                     if (attribs.Length != 2) throw new Exception("[Attributes count]" + i + ": " + line);
                     if (attribs[0].Contains('&') || attribs[0].Contains('|') || attribs[0].Contains('.')) 
@@ -179,7 +276,7 @@ namespace XMLtoXLSXcvt
                 }
                 else if (line == "}")
                 {
-                    if (current.Parrent != null) current = current.Parrent;
+                    current = current.Parrent;
                 }
                 else throw new Exception("[Bad format]" + i + ": " + line);
             }
@@ -200,126 +297,8 @@ namespace XMLtoXLSXcvt
                     if (sub_result == null) continue;
                     foreach (var found in sub_result)
                     {
-                        if (result.ContainsKey(found.Key)) result[found.Key] += "; " + found.Value;
-                        else result.Add(found.Key, found.Value);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        private bool CheckFilters(XmlNode node)
-        {
-            if (Filters.Count <= 0) return true;
-
-            bool any_found = false;
-            bool any_value = false;
-
-            foreach (var filter in Filters)
-            {
-                var path = filter.Key.Value;
-                var value_attribs = filter.Value.Attributes;
-                var value = filter.Value.Value;
-
-                bool result = false;
-                if (value_attribs.Contains('.'))
-                {
-                    foreach (XmlNode sub_node in node.SelectNodes(path))
-                    {
-                        var text = sub_node.FirstChild as XmlText;
-                        if (text != null)
-                        {
-                            var str = WebUtility.HtmlDecode(text.Data);
-                            result = Regex.IsMatch(str, value);
-                        }
-                    }
-                }
-                else if (value_attribs.Contains('*'))
-                {
-                    var regex = new Regex(
-                        "^" + Regex.Escape(value).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
-                        RegexOptions.IgnoreCase | RegexOptions.Singleline
-                        );
-
-                    foreach (XmlNode sub_node in node.SelectNodes(path))
-                    {
-                        var text = sub_node.FirstChild as XmlText;
-                        if (text != null)
-                        {
-                            var str = WebUtility.HtmlDecode(text.Data);
-                            result = regex.IsMatch(str);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (XmlNode sub_node in node.SelectNodes(path))
-                    {
-                        var text = sub_node.FirstChild as XmlText;
-                        if (text != null)
-                        {
-                            var str = WebUtility.HtmlDecode(text.Data);
-                            result = str == value;
-                        }
-                    }
-                }
-
-                if (!value_attribs.Contains('&') && !value_attribs.Contains('|')) return result;
-                if (value_attribs.Contains('&')) if (!result) return false;
-                if (value_attribs.Contains('|'))
-                {
-                    any_found = true;
-                    if (result) any_value = true;
-                }
-            }
-
-            if (any_found) return any_value;
-            else return true;
-        }
-
-        private Dictionary<string, string> FindValues(XmlNode node)
-        {
-            var result = new Dictionary<string, string>();
-            foreach (var value in Values)
-            {
-                var name_attribs = value.Key.Attributes;
-                var name = value.Key.Value;
-                var path = value.Value.Value;
-
-                if (name_attribs.Contains('$'))
-                {
-                    foreach (XmlNode sub_node_name in node.SelectNodes(name))
-                    {
-                        var text_name = sub_node_name.FirstChild as XmlText;
-                        if (text_name != null)
-                        {
-                            var header = WebUtility.HtmlDecode(text_name.Data);
-                            foreach (XmlNode sub_node in node.SelectNodes(path))
-                            {
-                                var text = sub_node.FirstChild as XmlText;
-                                if (text != null)
-                                {
-                                    var data = WebUtility.HtmlDecode(text.Data);
-                                    if (!result.ContainsKey(header))
-                                        result.Add(header, data);
-                                    else result[header] += "; " + data;
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (XmlNode sub_node in node.SelectNodes(path))
-                    {
-                        var text = sub_node.FirstChild as XmlText;
-                        if (text != null)
-                        {
-                            var data = WebUtility.HtmlDecode(text.Data);
-                            if (!result.ContainsKey(name)) result.Add(name, data);
-                            else result[name] += "; " + data;
-                        }
+                        if (!result.ContainsKey(found.Key)) result.Add(found.Key, found.Value);
+                        else result[found.Key] += "; " + found.Value;
                     }
                 }
             }
