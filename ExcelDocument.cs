@@ -68,6 +68,10 @@ namespace XMLtoXLSXcvt
             range.Value = data;
         }
 
+        public void RestartRows()
+        {
+            CurrentRowCount = 0;
+        }
         public void AddRow()
         {
             CurrentRowCount++;
@@ -88,6 +92,16 @@ namespace XMLtoXLSXcvt
             Excel.Range range = ExcelWorksheet.Range[
                 ExcelWorksheet.Cells[CurrentRowCount, 1],
                 ExcelWorksheet.Cells[CurrentRowCount, values.Count]
+                ];
+            range.NumberFormat = "@";
+            range.Value = values.ToArray();
+        }
+        public void AddRow(int start, List<string> values)
+        {
+            CurrentRowCount++;
+            Excel.Range range = ExcelWorksheet.Range[
+                ExcelWorksheet.Cells[CurrentRowCount, start + 1],
+                ExcelWorksheet.Cells[CurrentRowCount, start + values.Count]
                 ];
             range.NumberFormat = "@";
             range.Value = values.ToArray();

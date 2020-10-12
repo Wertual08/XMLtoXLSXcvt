@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -13,7 +14,7 @@ namespace XMLtoXLSXcvt
     {
         private static bool IsAttribute(char c)
         {
-            return "$|&.*".IndexOf(c) >= 0;
+            return "$|&.*!".IndexOf(c) >= 0;
         }
         private static string EscapeValues(string line)
         {
@@ -40,7 +41,7 @@ namespace XMLtoXLSXcvt
                 {
                     if (in_value)
                     {
-                        results.Add(current);
+                        results.Add(current.Replace("\\\"", "\""));
                         current = "";
                     }
                     in_value = !in_value;
@@ -84,6 +85,10 @@ namespace XMLtoXLSXcvt
         private static bool IsPatternCondition(string pattern)
         {
             return pattern.StartsWith("[") && pattern.EndsWith("]");
+        }
+        private static bool IsPatternPrefix(string pattern)
+        {
+            return pattern.StartsWith("<") && pattern.EndsWith(">");
         }
         private static Predicate<string> GetPredicate(string filter_attribs, string filter_str)
         {
@@ -131,13 +136,31 @@ namespace XMLtoXLSXcvt
             if (any_found) return any_value;
             else return true;
         }
-        private Dictionary<string, string> FindValues(XmlNode node)
+        private string ConstructPrefix(XmlNode node)
+        {
+            string result = "";
+            foreach (var prefix in Prefixes)
+            {
+                if (prefix.Attributes.Contains('!')) result += prefix.Value;
+                else
+                {
+                    foreach (XmlNode sub_node in node.SelectNodes(prefix.Value))
+                    {
+                        var text = sub_node.FirstChild as XmlText;
+                        if (text != null) result += WebUtility.HtmlDecode(text.Data);
+                    }
+                }
+            }
+            return result;
+        }
+        private Dictionary<string, string> FindValues(XmlNode node, string prefix)
         {
             var result = new Dictionary<string, string>();
             foreach (var value in Values)
             {
                 var name_attribs = value.Key.Attributes;
                 var name = value.Key.Value;
+                var value_attribs = value.Value.Attributes;
                 var path = value.Value.Value;
 
                 if (name_attribs.Contains('$'))
@@ -147,16 +170,25 @@ namespace XMLtoXLSXcvt
                         var text_name = sub_node_name.FirstChild as XmlText;
                         if (text_name != null)
                         {
-                            var header = WebUtility.HtmlDecode(text_name.Data);
-                            foreach (XmlNode sub_node in node.SelectNodes(path))
+                            var header = prefix + WebUtility.HtmlDecode(text_name.Data);
+
+                            if (value_attribs.Contains('!'))
                             {
-                                var text = sub_node.FirstChild as XmlText;
-                                if (text != null)
+                                if (!result.ContainsKey(header)) result.Add(header, path);
+                                else result[header] += "; " + path;
+                            }
+                            else
+                            {
+                                foreach (XmlNode sub_node in node.SelectNodes(path))
                                 {
-                                    var data = WebUtility.HtmlDecode(text.Data);
-                                    if (!result.ContainsKey(header))
-                                        result.Add(header, data);
-                                    else result[header] += "; " + data;
+                                    var text = sub_node.FirstChild as XmlText;
+                                    if (text != null)
+                                    {
+                                        var data = WebUtility.HtmlDecode(text.Data);
+                                        if (!result.ContainsKey(header))
+                                            result.Add(header, data);
+                                        else result[header] += "; " + data;
+                                    }
                                 }
                             }
                         }
@@ -164,14 +196,23 @@ namespace XMLtoXLSXcvt
                 }
                 else
                 {
-                    foreach (XmlNode sub_node in node.SelectNodes(path))
+                    var header = prefix + name;
+                    if (value_attribs.Contains('!'))
                     {
-                        var text = sub_node.FirstChild as XmlText;
-                        if (text != null)
+                        if (!result.ContainsKey(header)) result.Add(header, path);
+                        else result[header] += "; " + path;
+                    }
+                    else
+                    {
+                        foreach (XmlNode sub_node in node.SelectNodes(path))
                         {
-                            var data = WebUtility.HtmlDecode(text.Data);
-                            if (!result.ContainsKey(name)) result.Add(name, data);
-                            else result[name] += "; " + data;
+                            var text = sub_node.FirstChild as XmlText;
+                            if (text != null)
+                            {
+                                var data = WebUtility.HtmlDecode(text.Data);
+                                if (!result.ContainsKey(header)) result.Add(header, data);
+                                else result[header] += "; " + data;
+                            }
                         }
                     }
                 }
@@ -204,45 +245,47 @@ namespace XMLtoXLSXcvt
         public string Path;
         public readonly List<KeyValuePair<Unit, Unit>> Filters = new List<KeyValuePair<Unit, Unit>>();
         public readonly Dictionary<Unit, Unit> Values = new Dictionary<Unit, Unit>();
+        public readonly List<Unit> Prefixes = new List<Unit>();
         public readonly List<TemplateNode> SubNodes = new List<TemplateNode>();
         public TemplateNode Parrent = null;
 
-        public TemplateNode() { }
-        public TemplateNode(string[] lines)
+        public static List<TemplateNode> ParseLines(string[] lines)
         {
+            var result = new List<TemplateNode>();
             TemplateNode current = null;
 
             for (int i = 0; i < lines.Length; i++)
             {
                 var line = lines[i].Trim();
                 if (line.Length <= 0 || line[0] == '#') continue;
+                if (line == "===-===") break;
 
                 var pattern = EscapeValues(line);
                 var values = ExtractValues(line);
                 var attribs = ExtractAttribs(line);
-                
+
                 if (attribs == null) throw new Exception("[Unclosed quotes]" + i + ": " + line);
 
                 if (IsPatternPath(pattern))
                 {
                     if (values.Length != 1) throw new Exception("[Values count]" + i + ": " + line);
                     if (attribs.Length != 1) throw new Exception("[Attributes count]" + i + ": " + line);
-                    if (attribs[0] != "") throw new Exception("[Attributes]" + i + ": " + line); 
+                    if (attribs[0] != "") throw new Exception("[Attributes]" + i + ": " + line);
+
+                    var node = new TemplateNode();
+                    node.Path = values[0];
 
                     if (current == null)
                     {
-                        Path = values[0];
-                        current = this;
+                        result.Add(node);
                     }
                     else
                     {
-                        var node = new TemplateNode();
-                        node.Path = values[0];
-
                         current.SubNodes.Add(node);
                         node.Parrent = current;
-                        current = node;
                     }
+
+                    current = node;
                 }
                 else if (IsPatternCondition(pattern))
                 {
@@ -252,23 +295,31 @@ namespace XMLtoXLSXcvt
                     if (attribs[0] != "") throw new Exception("[Attributes]" + i + ": " + line);
                     if (attribs[1].Contains('$')) throw new Exception("[Attributes]" + i + ": " + line);
                     if (attribs[1].Contains('.') && attribs[1].Contains('*')) throw new Exception("[Attributes]" + i + ": " + line);
-                    //if (current.Filters.ContainsKey(new Unit(values[0]))) 
-                    //    throw new Exception("[Duplicated key]" + i + ": " + line);
 
-                    current.Filters.Add(new KeyValuePair<Unit, Unit>(new Unit(values[0]), new Unit(attribs[1], values[1])));
+                    current.Filters.Add(new KeyValuePair<Unit, Unit>(new Unit(attribs[0], values[0]), new Unit(attribs[1], values[1])));
+                }
+                else if (IsPatternPrefix(pattern))
+                {
+                    if (current == null) throw new Exception("[No current node]" + i + ": " + line);
+                    foreach (var attrib in attribs)
+                        if (attrib.Length != 0 && (attrib.Length != 1 || attrib[0] != '!')) 
+                            throw new Exception("[Attributes]" + i + ": " + line);
+                    for (int a = 0; a < attribs.Length; a++)
+                        current.Prefixes.Add(new Unit(attribs[a], values[a]));
                 }
                 else if (line.Contains(':'))
                 {
                     if (current == null) throw new Exception("[No current node]" + i + ": " + line);
                     if (values.Length != 2) throw new Exception("[Values count]" + i + ": " + line);
                     if (attribs.Length != 2) throw new Exception("[Attributes count]" + i + ": " + line);
-                    if (attribs[0].Contains('&') || attribs[0].Contains('|') || attribs[0].Contains('.')) 
+                    if (attribs[0].Length != 0 && (attribs[0].Length != 1 || attribs[0][0] != '$'))
                         throw new Exception("[Attributes]" + i + ": " + line);
-                    if (attribs[1] != "") throw new Exception("[Attributes]" + i + ": " + line);
+                    if (attribs[1].Length != 0 && (attribs[1].Length != 1 || attribs[1][0] != '!'))
+                        throw new Exception("[Attributes]" + i + ": " + line);
                     if (current.Values.ContainsKey(new Unit(values[0])))
                         throw new Exception("[Duplicated key]" + i + ": " + line);
 
-                    current.Values.Add(new Unit(attribs[0], values[0]), new Unit(values[1]));
+                    current.Values.Add(new Unit(attribs[0], values[0]), new Unit(attribs[1], values[1]));
                 }
                 else if (line == "{")
                 {
@@ -280,13 +331,18 @@ namespace XMLtoXLSXcvt
                 }
                 else throw new Exception("[Bad format]" + i + ": " + line);
             }
+
+            return result;
         }
+        public TemplateNode() { }
 
         public Dictionary<string, string> Apply(XmlNode root)
         {
             if (!CheckFilters(root)) return null;
 
-            var result = FindValues(root);
+            var prefix = ConstructPrefix(root);
+            var result = FindValues(root, prefix);
+            
 
             foreach (var sub_node in SubNodes)
             {

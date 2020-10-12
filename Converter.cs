@@ -16,67 +16,86 @@ namespace XMLtoXLSXcvt
     {
         private string XMLPath;
         private string XLSXPath;
-        private TemplateNode Template;
+        private List<TemplateNode> Templates;
 
         public event EventHandler ProgressChanged;
 
         public int Progress { get; private set; } = 0;
+        public string Message { get; private set; } = "";
 
-        public Converter(string xml, string xlsx, TemplateNode template)
+        public Converter(string xml, string xlsx, List<TemplateNode> templates)
         {
             XMLPath = xml;
             XLSXPath = xlsx;
-            Template = template;
+            Templates = templates;
         }
 
         public bool Convert()
         {
             Progress = 0;
-            var document = new XmlDocument();
-            document.Load(XMLPath);
-            using (var result_document = new ExcelDocument())
+            var xml_doc = new XmlDocument();
+            xml_doc.Load(XMLPath);
+
+            using (var xlsx_doc = new ExcelDocument())
             {
-                result_document.AddRow();
-                List<string> columns = new List<string>();
-
-                var nodes = document.SelectNodes(Template.Path);
-                for (int i = 0; i < nodes.Count; i++)
+                int offset = 0;
+                for (int i = 0; i < Templates.Count; i++)
                 {
-                    var node = nodes[i];
+                    Message = "Template: " + (i + 1) + " / " + Templates.Count;
 
-                    var values = Template.Apply(node);
+                    var template = Templates[i];
 
-                    if (values == null) continue;
-
-                    List<string> row = new List<string>(columns.Count);
-                    foreach (var value in values)
-                    {
-                        int index = columns.IndexOf(value.Key);
-                        if (index < 0)
-                        {
-                            index = columns.Count;
-                            result_document.AddColumn(columns.Count);
-                            columns.Add(value.Key);
-                        }
-                        while (row.Count <= index) row.Add("");
-                        row[index] = value.Value;
-                    }
-                    while (row.Count < columns.Count) row.Add("");
-                    result_document.AddRow(row);
-
-                    int progress = (i + 1) * 100 / nodes.Count;
-                    if (Progress != progress)
-                    {
-                        Progress = progress;
-                        ProgressChanged?.Invoke(this, EventArgs.Empty);
-                    }
+                    offset += PerformTemplate(template, xml_doc, xlsx_doc, offset);
                 }
-
-                for (int i = 0; i < columns.Count; i++)
-                    result_document[i, 0] = columns[i];
-
-                return result_document.Save(XLSXPath);
+                
+                return xlsx_doc.Save(XLSXPath);
             }
+        }
+
+        private int PerformTemplate(TemplateNode template, XmlDocument xml_doc, ExcelDocument xlsx_doc, int offset)
+        {
+            xlsx_doc.RestartRows();
+            xlsx_doc.AddRow();
+
+            List<string> columns = new List<string>();
+
+            var nodes = xml_doc.SelectNodes(template.Path);
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var node = nodes[i];
+
+                var values = template.Apply(node);
+
+                if (values == null) continue;
+
+                List<string> row = new List<string>(columns.Count);
+                foreach (var value in values)
+                {
+                    int index = columns.IndexOf(value.Key);
+                    if (index < 0)
+                    {
+                        index = columns.Count;
+                        xlsx_doc.AddColumn(offset + columns.Count);
+                        columns.Add(value.Key);
+                    }
+                    while (row.Count <= index) row.Add("");
+                    row[index] = value.Value;
+                }
+                while (row.Count < columns.Count) row.Add("");
+                xlsx_doc.AddRow(offset, row);
+
+                int progress = (i + 1) * 100 / nodes.Count;
+                if (Progress != progress)
+                {
+                    Progress = progress;
+                    ProgressChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }
+
+            for (int i = 0; i < columns.Count; i++)
+                xlsx_doc[offset + i, 0] = columns[i];
+
+            return columns.Count;
         }
     }
 }

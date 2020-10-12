@@ -16,7 +16,7 @@ namespace XMLtoXLSXcvt
 {
     public partial class ConverterForm : Form
     {
-        private readonly static string Version = "0.1.2.A";
+        private readonly static string Version = "0.1.3.1";
         private ConverterProperties Properties = new ConverterProperties();
 
         private void LoadConfig(string path)
@@ -64,28 +64,6 @@ namespace XMLtoXLSXcvt
             }
         }
 
-        private Dictionary<string, string> ParseConfig(string[] lines)
-        {
-            var result = new Dictionary<string, string>();
-            foreach (var line in lines)
-            {
-                if (line == "") continue;
-                var split_point = line.IndexOf(':');
-                if (split_point < 0)
-                {
-                    if (!result.ContainsKey("")) result.Add("", line);
-                    return result;
-                }
-                else
-                {
-                    var key = line.Substring(0, split_point).Trim();
-                    var value = line.Substring(split_point + 1).Trim();
-                    if (!result.ContainsKey(key)) result.Add(key, value);
-                }
-            }
-            return result;
-        }
-
         public ConverterForm()
         {
             InitializeComponent();
@@ -107,12 +85,12 @@ namespace XMLtoXLSXcvt
                 try { xlsx_path = Path.GetFullPath(xlsx_path); }
                 catch { ErrorMessenger.ShowBadFileNameError(this, xlsx_path); return; }
 
-                TemplateNode template;
-                try { template = new TemplateNode(TemplateTextBox.Lines); }
+                List<TemplateNode> template;
+                try { template = TemplateNode.ParseLines(TemplateTextBox.Lines); }
                 catch (Exception ex) { ErrorMessenger.ShowBadTemplateError(this, ex.Message); return; }
 
                 var converter = new Converter(xml_path, xlsx_path, template);
-
+                
                 ConvertButton.Enabled = false;
 
                 ConverterBackgroundWorker.RunWorkerAsync(converter);
@@ -133,13 +111,14 @@ namespace XMLtoXLSXcvt
             if (worker == null || converter == null) return;
 
             converter.ProgressChanged += (object sr, EventArgs ea) =>
-                worker.ReportProgress(converter.Progress);
+                worker.ReportProgress(converter.Progress, converter.Message);
 
             e.Result = converter.Convert();
         }
         private void ConverterBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             ProgressBar.Value = e.ProgressPercentage;
+            ProgressLabel.Text = e.UserState as string;
         }
         private void ConverterBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -156,6 +135,7 @@ namespace XMLtoXLSXcvt
                 ErrorMessenger.ShowCanNotSaveError(this);
             }
 
+            ProgressLabel.Text = "";
             ProgressBar.Value = 0;
             ConvertButton.Enabled = true;
         }
