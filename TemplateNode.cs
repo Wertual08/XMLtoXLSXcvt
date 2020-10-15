@@ -107,6 +107,25 @@ namespace XMLtoXLSXcvt
             }
             return false;
         }
+        private static string FindValue(XmlNode node, string attribs, string value)
+        {
+            if (attribs.Contains('!')) return value;
+            else
+            {
+                string result = "";
+                foreach (XmlNode sub_node in node.SelectNodes(value))
+                {
+                    var text = sub_node.FirstChild as XmlText;
+                    if (text != null)
+                    {
+                        var data = WebUtility.HtmlDecode(text.Data);
+                        if (result.Length == 0) result = data;
+                        else result += "; " + data;
+                    }
+                }
+                return result;
+            }
+        }
 
         private bool CheckFilters(XmlNode node)
         {
@@ -160,8 +179,8 @@ namespace XMLtoXLSXcvt
             {
                 var name_attribs = value.Key.Attributes;
                 var name = value.Key.Value;
-                var value_attribs = value.Value.Attributes;
-                var path = value.Value.Value;
+                var data_attribs = value.Value.Attributes;
+                var data = value.Value.Value;
 
                 if (name_attribs.Contains('$'))
                 {
@@ -171,50 +190,20 @@ namespace XMLtoXLSXcvt
                         if (text_name != null)
                         {
                             var header = prefix + WebUtility.HtmlDecode(text_name.Data);
+                            var text = FindValue(node, data_attribs, data);
 
-                            if (value_attribs.Contains('!'))
-                            {
-                                if (!result.ContainsKey(header)) result.Add(header, path);
-                                else result[header] += "; " + path;
-                            }
-                            else
-                            {
-                                foreach (XmlNode sub_node in node.SelectNodes(path))
-                                {
-                                    var text = sub_node.FirstChild as XmlText;
-                                    if (text != null)
-                                    {
-                                        var data = WebUtility.HtmlDecode(text.Data);
-                                        if (!result.ContainsKey(header))
-                                            result.Add(header, data);
-                                        else result[header] += "; " + data;
-                                    }
-                                }
-                            }
+                            if (!result.ContainsKey(header)) result.Add(header, text);
+                            else result[header] += "; " + text;
                         }
                     }
                 }
                 else
                 {
                     var header = prefix + name;
-                    if (value_attribs.Contains('!'))
-                    {
-                        if (!result.ContainsKey(header)) result.Add(header, path);
-                        else result[header] += "; " + path;
-                    }
-                    else
-                    {
-                        foreach (XmlNode sub_node in node.SelectNodes(path))
-                        {
-                            var text = sub_node.FirstChild as XmlText;
-                            if (text != null)
-                            {
-                                var data = WebUtility.HtmlDecode(text.Data);
-                                if (!result.ContainsKey(header)) result.Add(header, data);
-                                else result[header] += "; " + data;
-                            }
-                        }
-                    }
+                    var text = FindValue(node, data_attribs, data);
+
+                    if (!result.ContainsKey(header)) result.Add(header, text);
+                    else result[header] += "; " + text;
                 }
             }
 
